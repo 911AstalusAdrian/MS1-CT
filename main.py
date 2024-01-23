@@ -85,11 +85,6 @@ if __name__ == "__main__":
 #     plt.title('Relationship between Rotten Tomatoes Score and Box Office Revenue')
 #     plt.show()
 #
-#     # 14. Average Metascore per Genre
-#     average_metascore_per_genre = df.groupby('Genre')['Metascore'].mean().sort_values(ascending=False)
-#     average_metascore_per_genre.plot(kind='bar', xlabel='Genre', ylabel='Average Metascore',
-#                                      title='Average Metascore per Genre')
-#     plt.show()
 #
 #     # 15. Distribution of IMDb Scores
 #     df['IMDB'] = df['IMDB'].apply(lambda x: float(x) if pd.notna(x) else x)

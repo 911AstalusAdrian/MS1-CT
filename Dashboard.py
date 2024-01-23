@@ -1,7 +1,6 @@
 import constants
 import tkinter as tk
 import matplotlib.pyplot as plt
-from pandastable import Table, TableModel
 from RangeSlider.RangeSlider import RangeSliderH
 import pandas as pd
 
@@ -91,7 +90,6 @@ class Dashboard:
         self.__table.filter(rating, genre, runtime_low, runtime_high, year_low, year_high)
 
     def showStatistic(self):
-        pass
         # Distribution of Ratings in the DB
         # rated_distribution = self.__dataframe['Rated'].value_counts()
         # rated_distribution.plot(kind='bar', xlabel='Rating', ylabel='Number of Movies', title='Distribution of Ratings')
@@ -122,3 +120,19 @@ class Dashboard:
         # for count, bin_edge in zip(counts, bin_edges):
         #     plt.text(bin_edge, count, str(int(count)), ha='center', va='bottom', fontsize=3, color='black')
         # plt.show()
+
+        # Distribution of genres
+        # genres = pd.DataFrame(self.__dataframe['Genre'].str.split(', ', expand=True).stack().reset_index(level=1, drop=True).to_frame('Genre'))
+        # print(genres)
+        # genre_count = genres['Genre'].value_counts()
+        # genre_count.plot(kind='bar', color='red', edgecolor='gray')
+        # plt.show()
+
+        # Average Metascore per Genre
+        # metascore_genres = self.__dataframe[self.__dataframe['Metascore'] != 0][['Metascore', 'Genre']]
+        # genres_df = metascore_genres['Genre'].str.split(', ', expand=True).stack().reset_index(level=1, drop=True).to_frame('Genre')
+        # merged_df = pd.merge(metascore_genres, genres_df, left_index=True, right_index=True)
+        # avg_metascore_per_genre = merged_df.groupby('Genre_y')['Metascore'].mean().reset_index()
+        # plt.bar(avg_metascore_per_genre['Genre_y'], avg_metascore_per_genre['Metascore'])
+        # plt.show()
+
