@@ -7,3 +7,4 @@ genres = ['(all)', 'Drama', 'Crime', 'Biography', 'History', 'Action', 'Fantasy'
           'Western', 'Musical', 'Sport']
 runtimes = ['(all)', '<1h', '1h-2h', '2h-3h', '3h+']
 imdb_val = ['(all)', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+omdb_api = 'http://www.omdbapi.com/?apikey=57b6db&t='

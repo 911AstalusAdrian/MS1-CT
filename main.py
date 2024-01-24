@@ -1,41 +1,12 @@
-import tkinter
-
 import pandas as pd
 from Dashboard import Dashboard
-from pandastable import Table, TableModel
-from RangeSlider.RangeSlider import RangeSliderH
 import tkinter as tk
-import matplotlib.pyplot as plt
-from constants import *
 from DataTable import DataTable
-
-df = pd.read_csv('movies.csv')
-
-
-def display_pandas_table(parent, df):
-    main = tk.Toplevel(parent)
-    main.geometry('1350x600+300+50')
-    main.title('PandasTable Example')
-
-    f = tk.Frame(main)
-    f.pack(fill=tk.BOTH, expand=1)
-
-    global table
-    table = Table(f, dataframe=df, showtoolbar=False, showstatusbar=False)
-    table.show()
-    return table
-
-
-def filter_and_refresh(table, condition):
-    # Filter the DataFrame based on the condition
-    filtered_df = df[(df['Year'] > 2020) & (df['Rated'] == 'PG-13')]
-
-    # Update the table with the filtered DataFrame
-    table.model.df = filtered_df
-    table.redraw()
 
 
 def main():
+    df = pd.read_csv('movies.csv')
+
     root = tk.Tk()
     root.geometry('500x400')
 

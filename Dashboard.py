@@ -33,6 +33,9 @@ class Dashboard:
         self.__closeButton = None
         self.__statisticButton = None
 
+        self.__searchBox = None
+        self.__searchButton = None
+
         self.setDashboard()
         self.__table.show_table()
 
@@ -77,6 +80,16 @@ class Dashboard:
         self.__statisticButton.grid(row=5, column=1)
         self.__closeButton = tk.Button(self.__parent, text='Close', command=self.__parent.destroy)
         self.__closeButton.grid(row=5, column=2)
+
+        self.__searchBox = tk.Entry(self.__parent)
+        self.__searchBox.grid(row=6, column=0)
+        self.__searchButton = tk.Button(self.__parent, text='Search', command=self.searchMovie)
+        self.__searchButton.grid(row=6, column=1)
+
+    def searchMovie(self):
+        to_search = self.__searchBox.get()
+        print(to_search)
+        self.__table.findMovie(to_search)
 
     def filterData(self):
         rating = self.__rating.get()
