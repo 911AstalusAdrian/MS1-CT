@@ -30,7 +30,6 @@ class Dashboard:
         self.__yearLabel = None
 
         self.__filterButton = None
-        self.__closeButton = None
         self.__statisticButton = None
 
         self.__searchBox = None
@@ -67,24 +66,22 @@ class Dashboard:
 
         # Year label and slider
         self.__yearLabel = tk.Label(self.__parent, text='\nSelect a Year range')
-        self.__yearLabel.grid(row=3, column=0, padx=5, pady=20)
+        self.__yearLabel.grid(row=3, column=0, padx=5, pady=5)
         self.__yearSlider = RangeSliderH(self.__parent, [self.__yearLeft, self.__yearRight],
                                          padX=17, min_val=self.__yearLeft.get(), max_val=self.__yearRight.get(),
                                          digit_precision='.0f', font_size=8, Height=43, Width=200, bgColor='#f0f1f1')
-        self.__yearSlider.grid(row=3, column=1, pady=20)
+        self.__yearSlider.grid(row=3, column=1)
 
         # Filter and Close button
         self.__filterButton = tk.Button(self.__parent, text='Filter Data', command=self.filterData)
         self.__filterButton.grid(row=5, column=0)
         self.__statisticButton = tk.Button(self.__parent, text="Show Statistics", command=self.showStatistic)
         self.__statisticButton.grid(row=5, column=1)
-        self.__closeButton = tk.Button(self.__parent, text='Close', command=self.__parent.destroy)
-        self.__closeButton.grid(row=5, column=2)
 
         self.__searchBox = tk.Entry(self.__parent)
-        self.__searchBox.grid(row=6, column=0)
+        self.__searchBox.grid(row=6, column=0, pady=10)
         self.__searchButton = tk.Button(self.__parent, text='Search', command=self.searchMovie)
-        self.__searchButton.grid(row=6, column=1)
+        self.__searchButton.grid(row=6, column=1, pady=10)
 
     def searchMovie(self):
         to_search = self.__searchBox.get()
@@ -103,13 +100,12 @@ class Dashboard:
         self.__table.filter(rating, genre, runtime_low, runtime_high, year_low, year_high)
 
     def showStatistic(self):
-
-        # Distribution of Ratings in the DB
+        # 1. Distribution of Ratings in the DB
         rated_distribution = self.__dataframe['Rated'].value_counts()
         rated_distribution.plot(kind='bar', xlabel='Rating', ylabel='Number of Movies', title='Distribution of Ratings')
         plt.show()
 
-        # Movies and Series per Decade
+        # 2. Movies and Series per Decade
         movies_decades = pd.DataFrame(self.__dataframe['Year'])
         movies_decades['Decade'] = (movies_decades // 10) * 10
         decades = movies_decades.groupby('Decade').size()
@@ -118,7 +114,7 @@ class Dashboard:
                      title='Number of Movies and Series per Decade')
         plt.show()
 
-        # Box office revenue per Decade
+        # 3. Box office revenue per Decade
         revenue_decades = pd.DataFrame(self.__dataframe['BoxOffice'] / 1000000)
         revenue_decades['Year'] = self.__dataframe['Year']
         revenue_decades['Decade'] = (revenue_decades['Year'] // 10) * 10
@@ -128,28 +124,80 @@ class Dashboard:
                             title='Total Box Office revenue per Decade')
         plt.show()
 
-        # Distribution of movie runtimes
-        counts, bin_edges, _ = plt.hist(self.__dataframe['Runtime'], bins=10, color='green', edgecolor='black')
+        # 4. Distribution of movie runtimes
+        counts, bin_edges, _ = plt.hist(self.__dataframe['Runtime'], bins=10, color='green', edgecolor='black',
+                                        xlabel='Number of Movies', ylabel='Movie runtime',
+                                        title='Distribution of Movie runtimes')
         plt.xticks(bin_edges)
         for count, bin_edge in zip(counts, bin_edges):
             plt.text(bin_edge, count, str(int(count)), ha='center', va='bottom', fontsize=3, color='black')
         plt.show()
 
-        # Distribution of genres
-        genres = pd.DataFrame(self.__dataframe['Genre'].str.split(', ', expand=True).stack().reset_index(level=1, drop=True).to_frame('Genre'))
+        # 5. Distribution of genres
+        genres = pd.DataFrame(
+            self.__dataframe['Genre'].str.split(', ', expand=True).stack().reset_index(level=1, drop=True).to_frame(
+                'Genre'))
         print(genres)
         genre_count = genres['Genre'].value_counts()
-        genre_count.plot(kind='bar', color='red', edgecolor='gray')
+        genre_count.plot(kind='bar', color='red', edgecolor='gray', xlabel='Genres', ylabel='Number of Movies',
+                         title='Distribution of Genres')
+        plt.xticks(rotation=30, ha='right')
         plt.show()
 
-        # Average Metascore per Genre
-        metascore_genres = self.__dataframe[self.__dataframe['Metascore'] != 0][['Metascore', 'Genre']]
-        genres_df = metascore_genres['Genre'].str.split(', ', expand=True).stack().reset_index(level=1, drop=True).to_frame('Genre')
-        merged_df = pd.merge(metascore_genres, genres_df, left_index=True, right_index=True)
-        avg_metascore_per_genre = merged_df.groupby('Genre_y')['Metascore'].mean().reset_index()
-        plt.bar(avg_metascore_per_genre['Genre_y'], avg_metascore_per_genre['Metascore'])
+        # 6. Histograms for each rating type
+        ratings = self.__dataframe[['RottenTomatoes', 'Metascore', 'IMDB']]
+        ratings.hist(bins=10, figsize=(12, 6), layout=(1, 3), alpha=0.7, color='yellowgreen', edgecolor='gray')
+        plt.suptitle('Distribution of Ratings', fontsize=16)
         plt.show()
 
+        ratings['IMDB'] = ratings['IMDB'] * 10
+        ratings.boxplot(figsize=(10, 6))
+        plt.title('Boxplot of Ratings', fontsize=16)
+        plt.show()
 
-        'Cars'
-        searched_movies = self.__dataframe['Title'] == 'Cars'
+        # 7. Average Ratings per Genre
+        ratings_genre = self.__dataframe[['Metascore', 'RottenTomatoes', 'IMDB', 'Genre']]
+        ratings_genre['IMDB'] = ratings_genre['IMDB'] * 10
+        genres_df = ratings_genre['Genre'].str.split(', ', expand=True).stack().reset_index(level=1,
+                                                                                            drop=True).to_frame('Genre')
+        average_ratings = pd.merge(ratings_genre, genres_df, left_index=True, right_index=True)
+        average_ratings = average_ratings.groupby('Genre_y')[
+            ['Metascore', 'RottenTomatoes', 'IMDB']].mean().reset_index()
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        bar_width = 0.2
+        bar_positions = range(len(average_ratings))
+        ax.bar(bar_positions, average_ratings['IMDB'], width=bar_width, label='IMDB', color='yellow', align='center')
+        ax.bar([pos + bar_width for pos in bar_positions], average_ratings['RottenTomatoes'], width=bar_width,
+               label='RottenTomatoes', color='tomato', align='center')
+        ax.bar([pos + 2 * bar_width for pos in bar_positions], average_ratings['Metascore'], width=bar_width,
+               label='Metascore', color='dimgray', align='center')
+        ax.set_xticks([pos + bar_width for pos in bar_positions])
+        ax.set_xticklabels(average_ratings['Genre_y'])
+        plt.xticks(rotation=30, ha='right')
+        ax.set_title('Average Ratings by Genre')
+        ax.set_xlabel('Genre')
+        ax.set_ylabel('Average Rating')
+        ax.legend()
+        plt.show()
+
+        # 8. Scatter Plot of Metascore Ratings vs. Box Office Revenue
+        data = self.__dataframe[self.__dataframe['BoxOffice'] > 100000000][['Metascore', 'BoxOffice']]
+        data['BoxOffice'] = data['BoxOffice'] / 10000000
+        print(data['BoxOffice'])
+        plt.figure(figsize=(10, 6))
+        plt.scatter(x='Metascore', y='BoxOffice', data=data, alpha=0.8, edgecolors='w')
+        plt.title('Scatter Plot of Metascore Ratings vs. Box Office Revenue')
+        plt.xlabel('Metascore Ratings')
+        plt.ylabel('Box Office Revenue (in 10M$)')
+        plt.show()
+
+        # 9. Correlation matrix Metascore vs. RottenTomatoes vs. IMDB
+        correlation_matrix = ratings.corr()
+        plt.figure(figsize=(8, 6))
+        plt.imshow(correlation_matrix, cmap='coolwarm', vmin=0, vmax=1)
+        plt.colorbar()
+        plt.xticks(range(len(correlation_matrix.columns)), correlation_matrix.columns)
+        plt.yticks(range(len(correlation_matrix.columns)), correlation_matrix.columns)
+        plt.title('Correlation Heatmap: RottenTomatoes vs. Metascore vs. IMDB')
+        plt.show()

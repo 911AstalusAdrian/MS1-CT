@@ -27,7 +27,6 @@ class DataTable:
         selected_movie = self.__tempDataframe.iloc[row].values[0]
         response = requests.get(f"{constants.omdb_api}{selected_movie}")
         self.openPopup(response.json())
-        # print(response.json())
 
     def openPopup(self, json_response):
         top = tk.Toplevel(self.__table)
@@ -58,7 +57,8 @@ class DataTable:
         if genre != '(all)':
             conditions.append((self.__dataframe['Genre'].str.contains(genre)))
         if runtime_low is not None and runtime_high is not None:
-            conditions.append((self.__dataframe['Runtime'] >= runtime_low) & (self.__dataframe['Runtime'] <= runtime_high))
+            conditions.append(
+                (self.__dataframe['Runtime'] >= runtime_low) & (self.__dataframe['Runtime'] <= runtime_high))
         if year_low is not None and year_low is not None:
             conditions.append((self.__dataframe['Year'] >= year_low) & (self.__dataframe['Year'] <= year_high))
 
